@@ -3,7 +3,7 @@ import { useEffect, useRef, useLayoutEffect, FormEvent } from "react";
 import { useParams } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useChat } from "ai/react"; // Custom chat-related hook
+import { useChat, Message } from "ai/react"; // Custom chat-related hook
 interface ChatAreaProps {
   chatId: string;
   setChatId: (chatId: string) => void;
@@ -12,18 +12,20 @@ export const ChatArea = ({ chatId, setChatId }: ChatAreaProps) => {
   // 2. Getting route parameters
   const params = useParams();
   // 3. Using custom chat hook
-  const { messages, input, handleInputChange, handleSubmit, setMessages } = useChat();
+  const { messages, input, handleInputChange, handleSubmit, setMessages } = useChat(
+    //{ initialMessages: [Message({ role: "user", content: "法律について教えて" })] }
+  );
   // 4. Function to load chat messages
   const handleLoadChat = async () => {
     if (params.id && typeof params.id === "string") {
       setChatId(params.id);
       fetch("/api/chat", {
         method: "POST",
-        body: JSON.stringify({
-          test: "testing",
-          userId: params.id,
-          loadMessages: true,
-        }),
+        // body: JSON.stringify({
+        // test: "testing",
+        // userId: params.id,
+        // loadMessages: true,
+        // }),
       }).then((resp) => {
         resp.json().then((data: any[]) => {
           if (data.length === 0) {
@@ -66,7 +68,7 @@ export const ChatArea = ({ chatId, setChatId }: ChatAreaProps) => {
   }, [messages]);
   // 9. Using useEffect to load chat messages when the component mounts
   useEffect(() => {
-    handleLoadChat();
+    // handleLoadChat();
   }, []);
   // 10. Rendering the ChatArea component
   return (
@@ -74,16 +76,15 @@ export const ChatArea = ({ chatId, setChatId }: ChatAreaProps) => {
       <div ref={containerRef} className="h-full flex flex-col overflow-y-auto overflow-x-hidden">
         {messages.length > 0
           ? messages.map((m) => (
-              <div key={m.id} className={`${m.role === "user" ? "flex justify-end" : "flex justify-start"} my-1`}>
-                <div
-                  className={`max-w-3/4 px-4 py-2 rounded-lg ${
-                    m.role === "user" ? "bg-blue-600 text-white" : "bg-gray-200"
+            <div key={m.id} className={`${m.role === "user" ? "flex justify-end" : "flex justify-start"} my-1`}>
+              <div
+                className={`max-w-3/4 px-4 py-2 rounded-lg ${m.role === "user" ? "bg-blue-600 text-white" : "bg-gray-200"
                   }`}
-                >
-                  {m.content}
-                </div>
+              >
+                {m.content}
               </div>
-            ))
+            </div>
+          ))
           : null}
       </div>
       <form onSubmit={handleAllSubmits} className="">
