@@ -8,7 +8,7 @@ export const RivGirl = () => {
     });
 
     return (
-        <div className="max-h-screen ps-64" style={{ width: "500px", height: "700px" }}>
+        <div className="max-h-screen ps-64" style={{ width: "700px", height: "900px" }}>
             <RiveComponent />
         </div>
     )

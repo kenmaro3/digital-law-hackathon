@@ -8,6 +8,7 @@ import { useChat, Message } from "ai/react"; // Custom chat-related hook
 import { RivGirl } from "./RivGirl";
 import { Toggle } from "@/components/ui/toggle"
 import { RivRobot } from "./RivRobot";
+import { RivBot } from "./RivBot";
 
 interface CreateSoundRequest {
   /**
@@ -44,37 +45,6 @@ export const ChatArea = ({ chatId, setChatId }: ChatAreaProps) => {
   );
 
 
-  // 4. Function to load chat messages
-  const handleLoadChat = async () => {
-    if (params.id && typeof params.id === "string") {
-      setChatId(params.id);
-      fetch("/api/chat", {
-        method: "POST",
-        // body: JSON.stringify({
-        // test: "testing",
-        // userId: params.id,
-        // loadMessages: true,
-        // }),
-      }).then((resp) => {
-        resp.json().then((data: any[]) => {
-          if (data.length === 0) {
-            return;
-          }
-          if (data.length > 0) {
-            // 5. Filtering and mapping chat data
-            data = data.filter((item) => item.data.content);
-            data = data.map((item, i) => {
-              return {
-                content: item.data.content,
-                role: item.type === "human" ? "user" : "ai",
-              };
-            });
-          }
-          setMessages(data);
-        });
-      });
-    }
-  };
   // 6. Function to handle all submits
   const handleAllSubmits = (e: any) => {
     if (e.key === "Enter") {
@@ -146,7 +116,9 @@ export const ChatArea = ({ chatId, setChatId }: ChatAreaProps) => {
           <Button className="w-full mb-2">Send</Button>
         </form>
         <div className="absolute inset-x-0 top-0 h-screen z-[-1] bg-gradient-to-b from-transparent to-black rounded-b-2xl">
-          <RivGirl />
+          <div className="flex justify-start">
+            <RivGirl />
+          </div>
         </div>
       </div>
     </>

@@ -12,7 +12,7 @@ export default function Chat() {
   // 3. Rendering the Chat component
   return (
     <div className="w-full h-screen flex justify-between items-center">
-      <Sidebar userId={userId} />
+      {/* <Sidebar userId={userId} /> */}
       <ChatArea chatId={chatId} setChatId={setChatId} />
     </div>
   );
