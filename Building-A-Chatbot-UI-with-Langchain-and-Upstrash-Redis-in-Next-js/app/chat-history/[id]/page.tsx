@@ -1,8 +1,8 @@
 "use client"
 // 1. Import statements
+import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatArea } from "@/components/ChatArea";
-import { useState } from "react";
 
 // 2. Default function for Chat component
 export default function Chat() {

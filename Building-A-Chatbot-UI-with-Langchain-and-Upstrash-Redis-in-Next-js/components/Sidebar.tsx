@@ -1,3 +1,4 @@
+"use client"
 // 1. Import necessary modules and components
 import { useState, useEffect } from "react"; // Import useState and useEffect hooks from React
 import { useParams } from "next/navigation"; // Import the useParams hook from Next.js
