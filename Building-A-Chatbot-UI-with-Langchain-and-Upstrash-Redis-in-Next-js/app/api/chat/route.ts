@@ -1,18 +1,10 @@
 // 1. Import required modules
-import { Redis } from "@upstash/redis";
-import { UpstashRedisChatMessageHistory } from "langchain/stores/message/upstash_redis";
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { AgentExecutor } from "langchain/agents";
 import { BufferMemory, ConversationSummaryBufferMemory, ChatMessageHistory } from "langchain/memory";
-import { ConversationChain } from "langchain/chains";
 import { StreamingTextResponse, LangChainStream } from 'ai';
-import { Calculator } from "langchain/tools/calculator";
-import { loadAgent } from "langchain/agents/load";
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { DynamicTool, DynamicStructuredTool } from "langchain/tools";
 import { ChatMessage } from 'langchain/schema';
-import * as z from 'zod';
-import { MessagesPlaceholder } from "langchain/dist/prompts";
 import { NextRequest, NextResponse } from "next/server";
 
 interface ListLawToolRequest {
@@ -45,10 +37,6 @@ const get_function = async (keyword: string) => {
       let res_sentence_list: string[] = []
       const items = data["items"]
       items.forEach((item) => {
-        const reduced_item: LawElement = {}
-        reduced_item["law_id"] = item["law_info"]["law_id"]
-        reduced_item["law_num"] = item["law_info"]["law_num"]
-        reduced_item["sentence"] = item["sentence"]
         res_id_list.push(item["law_info"]["law_id"])
         res_num_list.push(item["law_info"]["law_num"])
         res_sentence_list.push(item["sentence"])
@@ -108,59 +96,28 @@ const listLawTool = new DynamicTool({
   },
 });
 
-// 2. Initialize Redis client
-const client = Redis.fromEnv()
-// 3. Set runtime environment
 export const runtime = 'edge';
 
 
+export async function GET(req: Request) {
+  return NextResponse.json(
+    { output: "hello, world" },
+    { status: 200 },
+  );
+}
 
 // 4. Define POST function
 export async function POST(req: Request) {
-  // 5. Initialize stream and handlers
-  const { stream, handlers } = LangChainStream();
-  // 6. Parse request JSON
   const { messages } = await req.json();
-  // 7. Load chat history if requested
-  // if (userId && loadMessages) {
-  //   const populateHistoricChat = (await client.lrange(userId, 0, -1)).reverse();
-  //   return new Response(JSON.stringify(populateHistoricChat));
-  // }
-  // // 8. Initialize memory buffer and chat history
-  // const memory = new BufferMemory({
-  //   chatHistory: new UpstashRedisChatMessageHistory({
-  //     sessionId: userId,
-  //     client: Redis.fromEnv(),
-  //   }),
-  // });
-  // const memory = new BufferMemory({ returnMessages: true, memoryKey: "chat_history" });
-  // memory.chatHistory = new ChatMessageHistory(messages.content);
-
-
-  // 9. Initialize chat model
   const llm = new ChatOpenAI({
     // modelName: "gpt-3.5-turbo-0613",
     modelName: "gpt-4",
     temperature: 0,
     streaming: true,
   });
-  // 10. Initialize conversation chain
 
-
-
-  // ツールの準備
   const tools = [listLawTool];
 
-  // エージェントの準備
-  // const agent = await loadAgent(
-  //   "lc://agents/zero-shot-react-description/agent.json",
-  //   { llm: llm, tools }
-  // );
-  // const executor = AgentExecutor.fromAgentAndTools({
-  //   agent,
-  //   tools,
-  //   returnIntermediateSteps: true,
-  // });
   const prompt = `
     あなたは法律の専門家です。
     法律について検索をすることができますが、検索するにはキーワードが必要です。
@@ -170,7 +127,6 @@ export async function POST(req: Request) {
     法令番号、法令ID、法令の簡潔な内容、e-gov のウェブサイトへのリンクも提示してください。
     提示した後は、「詳細について知りたいときは法令番号をお申し付けください」と回答してください。
   `;
-  //キーワードが曖昧な場合は、「検索できるキーワードを書いてください」と回答してください。
 
   const lastMessage = messages[messages.length - 1].content;
   const returnIntermediateSteps = false
@@ -224,48 +180,4 @@ export async function POST(req: Request) {
     return new StreamingTextResponse(fakeStream);
   }
 
-
-  //const chain = new ConversationChain({ llm: llm, memory });
-  // 11. Get the last message from the input messages
-
-  // ===============================================================
-  // ===============================================================
-  // option 1, executor.run
-  // const result = await executor.run({
-  //   input: lastMessage, callbacks: [handlers]
-  // });
-  // const result = await executor.run(lastMessage);
-  // const result = await executor.call({ input: lastMessage });
-  // const result = await executor.call({
-  //   input: lastMessage, callbacks: [handlers],
-  // })
-
-  // const chunks = result.split(" ");
-
-  // const responseStream = new ReadableStream({
-  //   async start(controller) {
-  //     for (const chunk of chunks) {
-  //       const bytes = new TextEncoder().encode(chunk + " ");
-  //       controller.enqueue(bytes);
-  //       await new Promise((r) => setTimeout(r, Math.floor(Math.random() * 20 + 10)))
-
-  //     }
-  //     controller.close()
-  //   },
-  // });
-
-  // return new StreamingTextResponse(responseStream);
-
-
-  // ===============================================================
-  // ===============================================================
-  // option 2, executor.call
-
-  // // 12. Call the conversation chain with the last message and handlers
-  // executor.call({
-  //   input: lastMessage, callbacks: [handlers]
-  // })
-
-  // // 13. Return a streaming text response
-  // return new StreamingTextResponse(stream);
 }

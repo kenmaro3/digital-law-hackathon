@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { useChat, Message } from "ai/react"; // Custom chat-related hook
 import { RivGirl } from "./RivGirl";
 import { Toggle } from "@/components/ui/toggle"
-import { RivRobot } from "./RivRobot";
-import { RivBot } from "./RivBot";
 
 interface CreateSoundRequest {
   /**
@@ -17,11 +15,7 @@ interface CreateSoundRequest {
   text: string;
 }
 
-interface ChatAreaProps {
-  chatId: string;
-  setChatId: (chatId: string) => void;
-}
-export const ChatArea = ({ chatId, setChatId }: ChatAreaProps) => {
+export const ChatArea = () => {
   const [isSpeak, setIsSpeak] = useState(true)
   const [composing, setComposition] = useState(false);
   const startComposition = () => setComposition(true);
@@ -50,11 +44,6 @@ export const ChatArea = ({ chatId, setChatId }: ChatAreaProps) => {
     if (e.key === "Enter") {
       if (composing) return;
       handleSubmit(e as FormEvent<HTMLFormElement>, {
-        options: {
-          body: {
-            userId: chatId,
-          },
-        },
       });
       setInput("")
     }
