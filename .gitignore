@@ -13,3 +13,4 @@ npm-debug.log
 policy.pdf
 .env
 __pycache__
+.vercel
