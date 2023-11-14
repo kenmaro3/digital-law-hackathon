@@ -5,6 +5,7 @@ import requests
 import json
 
 url = 'https://api.lawapi-prototype-test-elaws.e-gov.go.jp/api/2'
+case_search_url = "https://www.courts.go.jp/app/hanrei_jp/list1?filter[text1]="
 
 
 # トピック一覧を取得するツール
@@ -33,6 +34,8 @@ class ListLawTool(BaseTool): # BaseToolクラスのサブクラスとして、�
             reduced_item["law_id"] = item["law_info"]["law_id"]
             reduced_item["law_num"] = item["law_info"]["law_num"]
             reduced_item["sentence"] = item.get("sentence")
+            reduced_item["title"] = item.get("revision_info")["law_title"]
+            #reduced_item["case_link"] = f'{case_search_url}{item.get("revision_info")["law_title"]}'
             res.append(reduced_item)
 
         return res

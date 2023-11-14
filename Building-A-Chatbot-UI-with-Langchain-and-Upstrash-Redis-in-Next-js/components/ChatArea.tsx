@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useChat, Message } from "ai/react"; // Custom chat-related hook
 import { RivGirl } from "./RivGirl";
 import { Toggle } from "@/components/ui/toggle"
+import ReactMarkdown from 'react-markdown';
+import ReactTypingEffect from 'react-typing-effect';
 
 interface CreateSoundRequest {
   /**
@@ -15,7 +17,16 @@ interface CreateSoundRequest {
   text: string;
 }
 
+function LinkRenderer(props: any) {
+  return (
+    <a href={props.href} target="_blank" rel="noreferrer">
+      {props.children}
+    </a>
+  );
+}
+
 export const ChatArea = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [isSpeak, setIsSpeak] = useState(true)
   const [composing, setComposition] = useState(false);
   const startComposition = () => setComposition(true);
@@ -27,6 +38,7 @@ export const ChatArea = () => {
     //{ initialMessages: [Message({ role: "user", content: "法律について教えて" })] }
     {
       onFinish: async (message) => {
+        setIsLoading(false)
 
         if (isSpeak) {
           //await handleGetAudio(params)
@@ -46,6 +58,7 @@ export const ChatArea = () => {
       handleSubmit(e as FormEvent<HTMLFormElement>, {
       });
       setInput("")
+      setIsLoading(true)
     }
   };
 
@@ -86,11 +99,28 @@ export const ChatArea = () => {
                   className={`max-w-3/4 px-4 py-2 rounded-lg ${m.role === "user" ? "bg-blue-600 text-white" : "bg-gray-200"
                     }`}
                 >
-                  {m.content}
+                  <ReactMarkdown components={{ a: LinkRenderer }}>
+                    {m.content}
+                  </ReactMarkdown>
+
                 </div>
               </div>
             ))
             : null}
+
+          {isLoading &&
+            <>
+              <div className="flex justify-start">
+                <h2 className="max-w-3/4 px-4 py-2 rounded-lg bg-gray-200">
+                  <ReactTypingEffect
+                    text={["・・・・・・・・・・・"]}
+                    speed={50}
+                    eraseSpeed={50}
+                  />
+                </h2>
+              </div>
+            </>
+          }
         </div>
         <form onSubmit={handleAllSubmits} className="">
           <Textarea
