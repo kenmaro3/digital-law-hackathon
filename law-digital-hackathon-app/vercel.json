@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "app/*.ts": {
+      "maxDuration": 100
+    },
+    "app/api/*.ts": {
+      "maxDuration": 100
+    },
+    "app/api/chat/*.ts": {
+      "maxDuration": 100
+    }
+  }
+}
