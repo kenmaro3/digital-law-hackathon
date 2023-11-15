@@ -168,7 +168,7 @@ export const ChatArea = () => {
             </Button>
           </form>
         </div>
-        <div className="absolute w-full top-0 h-screen z-[-1] bg-gradient-to-r from-black to-violet-900 rounded-b-2lg">
+        <div className="absolute w-full top-0 h-screen z-[-1] bg-gradient-to-r from-black to-fuchsia-600 rounded-b-2lg">
           <div className="flex justify-center items-center">
             <RivGirl />
           </div>
