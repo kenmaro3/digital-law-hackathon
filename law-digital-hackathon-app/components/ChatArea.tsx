@@ -92,7 +92,7 @@ export const ChatArea = () => {
   };
   return (
     <>
-      <div className="h-screen w-full flex flex-col justify-between items-center">
+      <div className="h-screen max-h-[888px] w-full flex flex-col justify-between items-center">
         <div className="flex flex-col h-[100%] w-[500px]">
           <div className="flex flex-row justify-between">
             <div
@@ -168,7 +168,7 @@ export const ChatArea = () => {
             </Button>
           </form>
         </div>
-        <div className="absolute w-[500px] top-0 h-screen z-[-1] bg-gradient-to-b from-black to-black rounded-b-2xl">
+        <div className="absolute w-full top-0 h-screen z-[-1] bg-gradient-to-r from-black to-violet-900 rounded-b-2lg">
           <div className="flex justify-center items-center">
             <RivGirl />
           </div>
