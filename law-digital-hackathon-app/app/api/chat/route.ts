@@ -289,6 +289,7 @@ export async function POST(req: Request) {
     When you use LawsTool, you must input japanese keyword, so you should translate the keyword to japanese, also to write japanese, you sometime typo, so be very careful for keyword to search.
     When you use the LawsTool, your response needs to include [law_id, law_num] for each law.
     Plus, law_id should be returned as a link https://elaws.e-gov.go.jp/document?lawid= with the law_id appended after the - in the link. and make link as bold italic.
+    If the result of LawsTool is empty array, you should say "I could not find law from Law API".
     Also, you know many court cases related to the situation of the customer or keyword from customer.
     so you should provide the court case link with https://www.courts.go.jp/app/hanrei_jp/list1?filter[text1]= with the case keyword appended after the = in the link, if you have multiple keywords, do like ?filter[text1]=<first keyword>&filter[text2]=<second keyword>.
     If you are writing the link, make them bold italic to indicate that is the link.
