@@ -59,14 +59,14 @@ export const ChatArea = () => {
 
   // 6. Function to handle all submits
   const handleAllSubmits = (e: any) => {
-    e.preventDefault();
     if (e.key === 'Enter') {
       if (composing) return;
       handleSubmit(e as FormEvent<HTMLFormElement>, {});
       setInput('');
       setIsLoading(true);
     }
-    if(e.type == "submit"){
+    if (e.type == "submit") {
+      e.preventDefault();
       if (composing) return;
       handleSubmit(e as FormEvent<HTMLFormElement>, {});
       setInput('');
