@@ -51,6 +51,10 @@ export const ChatArea = () => {
           //await handleGetAudio(params)
           let utterance = new SpeechSynthesisUtterance(message.content);
           utterance.lang = 'ja-JP';
+          utterance.voice = speechSynthesis.getVoices().filter(function (voice) {
+            return voice.name == 'Kyoko';
+          })[0];
+          utterance.pitch = 1;
           window.speechSynthesis.speak(utterance);
         }
       },
@@ -65,7 +69,7 @@ export const ChatArea = () => {
       setInput('');
       setIsLoading(true);
     }
-    if (e.type == "submit") {
+    if (e.type == 'submit') {
       e.preventDefault();
       if (composing) return;
       handleSubmit(e as FormEvent<HTMLFormElement>, {});
@@ -81,7 +85,13 @@ export const ChatArea = () => {
   };
 
   useEffect(() => {
-    let utterance = new SpeechSynthesisUtterance('hey, how can I help you?');
+    let utterance = new SpeechSynthesisUtterance(
+      'こんにちは！テミスです、よろしくお願いします！'
+    );
+    utterance.voice = speechSynthesis.getVoices().filter(function (voice) {
+      return voice.name == 'Kyoko';
+    })[0];
+    utterance.pitch = 1;
     window.speechSynthesis.speak(utterance);
   }, []);
 
@@ -125,23 +135,25 @@ export const ChatArea = () => {
             className="h-full mx-3 flex flex-col overflow-y-auto overflow-x-hidden">
             {messages.length > 0
               ? messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`${m.role === 'user'
-                    ? 'flex justify-end'
-                    : 'flex justify-start'
-                    } my-1`}>
                   <div
-                    className={`max-w-[60%] px-4 py-2 rounded-lg ${m.role === 'user'
-                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white'
-                      : 'bg-gray-200 opacity-80'
+                    key={m.id}
+                    className={`${
+                      m.role === 'user'
+                        ? 'flex justify-end'
+                        : 'flex justify-start'
+                    } my-1`}>
+                    <div
+                      className={`max-w-[60%] px-4 py-2 rounded-lg ${
+                        m.role === 'user'
+                          ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white'
+                          : 'bg-gray-200 opacity-80'
                       }`}>
-                    <ReactMarkdown components={{ a: LinkRenderer }}>
-                      {m.content}
-                    </ReactMarkdown>
+                      <ReactMarkdown components={{ a: LinkRenderer }}>
+                        {m.content}
+                      </ReactMarkdown>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))
               : null}
 
             {isLoading && (
