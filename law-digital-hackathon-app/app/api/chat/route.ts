@@ -178,7 +178,7 @@ const lawToLawNum = {
 
 lawToLawNum["社債、株式等の振替に関する法律"] = "平成十三年法律第七十五号";
 
-const get_function = async (keyword: string) => {
+const laws_api_get_function = async (keyword: string) => {
 
   const url = 'https://api.lawapi-prototype-test-elaws.e-gov.go.jp/api/2/laws'
   const params: ListLawToolRequest = {}
@@ -201,21 +201,24 @@ const get_function = async (keyword: string) => {
       let res_id_list: string[] = []
       let res_num_list: string[] = []
       const items = data["laws"]
-      items.forEach((item) => {
-        res_id_list.push(item["law_info"]["law_id"])
-        res_num_list.push(item["law_info"]["law_num"])
-      })
-      const res: ListLawToolResponse = {
-        law_ids: res_id_list.join(),
-        law_nums: res_num_list.join(),
+      if (items == undefined) {
+        return "result not found"
+      } else {
+        items.forEach((item) => {
+          res_id_list.push(item["law_info"]["law_id"])
+          res_num_list.push(item["law_info"]["law_num"])
+        })
+        const res: ListLawToolResponse = {
+          law_ids: res_id_list.join(),
+          law_nums: res_num_list.join(),
 
+        }
+        return res
       }
-      return res
-
     })
 }
 
-const listLawTool = new DynamicTool({
+const lawsTool = new DynamicTool({
   name: "LawsTool",
   description:
     `This tool is useful to get infomation of laws by law_num`,
@@ -240,7 +243,7 @@ const listLawTool = new DynamicTool({
   // }),
   func: async (query) => {
     const params: ListLawToolRequest = {}
-    const res = await get_function(query)
+    const res = await laws_api_get_function(query)
     console.log("\nhrere======================")
     console.log(res)
     // const tmp = {}
@@ -251,6 +254,93 @@ const listLawTool = new DynamicTool({
     let res_string = `
     searched law_id is [${res["law_ids"]}],
     and corresponding law_num is [${res["law_nums"]}],
+    `
+    return res_string
+  },
+});
+
+const keyword_api_get_function = async (keyword: string) => {
+
+  const url = 'https://api.lawapi-prototype-test-elaws.e-gov.go.jp/api/2/keyword'
+  const params: ListLawToolRequest = {}
+  params["keyword"] = keyword
+  params["limit"] = 2
+  const query_params = new URLSearchParams(params);
+  console.log(query_params)
+
+  return await fetch(`${url}?${query_params}`, {
+    method: "GET",
+  })
+    .then(response => response.json())
+    .then(data => {
+      let res_id_list: string[] = []
+      let res_num_list: string[] = []
+      let res_sentence_list: string[] = []
+      let res_title_list: string[] = []
+      const items = data["items"]
+
+      if (items == undefined) {
+        return "result not found"
+      } else {
+        items.forEach((item) => {
+          res_id_list.push(item["law_info"]["law_id"])
+          res_num_list.push(item["law_info"]["law_num"])
+          res_sentence_list.push(item["sentence"])
+          res_title_list.push(item["revision_info"]["law_title"])
+        })
+        const res: ListLawToolResponse = {
+          law_ids: res_id_list.join(),
+          law_nums: res_num_list.join(),
+          law_sentences: res_sentence_list.join(),
+          law_titles: res_title_list.join()
+
+        }
+        return res
+
+      }
+    })
+}
+
+const keywordTool = new DynamicTool({
+  name: "KeywordTool",
+  description:
+    `Get laws which is related to the keyword.
+        If you know the keyword to search the law, please call this.
+        `,
+  // schema: z.array(z.object({
+  //   law_id: z.string().describe("法令ID"),
+  //   law_num: z.string().describe("法令番号"),
+  //   sentence: z.string().describe("該当箇所の文章"),
+
+  // })),
+  // schema: z.object({
+  //   law_id: z.string().describe("法令ID"),
+  //   law_num: z.string().describe("法令番号"),
+  //   sentence: z.string().describe("該当箇所の文章"),
+
+  // }),
+  //schema: z.string(),
+  returnDirect: false,
+  // schema: z.object({
+  //   law_id: z.string(),
+  //   law_num: z.string(),
+  //   sentence: z.string(),
+  // }),
+  func: async (query) => {
+    const params: ListLawToolRequest = {}
+    const res = await keyword_api_get_function(query)
+    console.log("\nhrere======================")
+    console.log(res)
+    // const tmp = {}
+    // tmp["law_id"] = "test_id"
+    // tmp["law_num"] = "test_num"
+    // tmp["sentence"] = "test_sentence"
+    //検索にヒットした法令IDは[${res["law_ids"]}],
+    let res_string = `
+    searched law_id is [${res["law_ids"]}],
+    corresponding law_num is [${res["law_nums"]}],
+    related sentence is [${res["law_sentences"]}],
+    law_title is [${res["law_titles"]}],
     `
     return res_string
   },
@@ -277,7 +367,7 @@ export async function POST(req: Request) {
     streaming: true,
   });
 
-  const tools = [listLawTool];
+  const tools = [lawsTool, keywordTool];
 
   const prompt = `
     You are the expert of law and you are so kind that you will try to help giving advise to your customer as a lawyer as much as possible.
@@ -285,17 +375,22 @@ export async function POST(req: Request) {
     All of your response should be in markdown format.
     Your customer is not expert of law, so they might not know what exact keyword to search, so customer might give you some situation or incident instead of keyword.
     In that case, you use your expertise to guess the keyword you should search to list the related law.
+    However, if the customer has specific keyword that they are asking, just use that keyword.
     You should always use LawsTool to search related laws with the keyword. Keyword should be law name that you guess it is related to the customer description, for instance, 民法 or 商標法.
     When you use LawsTool, you must input japanese keyword, so you should translate the keyword to japanese, also to write japanese, you sometime typo, so be very careful for keyword to search.
     When you use the LawsTool, your response needs to include [law_id, law_num] for each law.
     Plus, law_id should be returned as a link https://elaws.e-gov.go.jp/document?lawid= with the law_id appended after the - in the link. and make link as bold italic.
-    If the result of LawsTool is empty array, you should say "I could not find law from Law API".
+    After using LawsTool, if the searched results are not enough, you should also use KeywordTool to search related laws with keyword or not.
+    when you are using KeywordTool with multiple keywords, it would be better using one keyword at a time.
+    Those searched related laws will help your response.
+
     Also, you know many court cases related to the situation of the customer or keyword from customer.
     so you should provide the court case link with https://www.courts.go.jp/app/hanrei_jp/list1?filter[text1]= with the case keyword appended after the = in the link, if you have multiple keywords, do like ?filter[text1]=<first keyword>&filter[text2]=<second keyword>.
     If you are writing the link, make them bold italic to indicate that is the link.
     Plus, you should make the importance word in your response bold chacartor.
     I see you sometime mis-write 財産分与 as 財産分享. so be careful.
     You sometimes forget to make italic bold the link you provided in markdown, so be careful.
+    Don't forget to reply in japanense if customer ask you a question in japanese.
   `;
 
   // 法令番号、法令ID、法令の簡潔な内容、e-gov のウェブサイトへのリンクも提示してください。
