@@ -189,7 +189,7 @@ const laws_api_get_function = async (keyword: string) => {
     params["law_num"] = tmp
 
   }
-  params["limit"] = 2
+  params["limit"] = 5
   const query_params = new URLSearchParams(params);
   console.log(query_params)
 
@@ -264,7 +264,7 @@ const keyword_api_get_function = async (keyword: string) => {
   const url = 'https://api.lawapi-prototype-test-elaws.e-gov.go.jp/api/2/keyword'
   const params: ListLawToolRequest = {}
   params["keyword"] = keyword
-  params["limit"] = 2
+  params["limit"] = 5
   const query_params = new URLSearchParams(params);
   console.log(query_params)
 
@@ -378,6 +378,7 @@ export async function POST(req: Request) {
     However, if the customer has specific keyword that they are asking, just use that keyword.
     You should always use LawsTool to search related laws with the keyword. Keyword should be law name that you guess it is related to the customer description, for instance, 民法 or 商標法.
     When you use LawsTool, you must input japanese keyword, so you should translate the keyword to japanese, also to write japanese, you sometime typo, so be very careful for keyword to search.
+    Plus, your keyword should be as short as possible to have a better search result.
     When you use the LawsTool, your response needs to include [law_id, law_num] for each law.
     Plus, law_id should be returned as a link https://elaws.e-gov.go.jp/document?lawid= with the law_id appended after the - in the link. and make link as bold italic.
     After using LawsTool, if the searched results are not enough, you should also use KeywordTool to search related laws with keyword or not.
