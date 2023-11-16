@@ -65,6 +65,13 @@ export const ChatArea = () => {
       setInput('');
       setIsLoading(true);
     }
+    if (e.type == "submit") {
+      e.preventDefault();
+      if (composing) return;
+      handleSubmit(e as FormEvent<HTMLFormElement>, {});
+      setInput('');
+      setIsLoading(true);
+    }
   };
 
   const handleStop = () => {
@@ -118,25 +125,23 @@ export const ChatArea = () => {
             className="h-full mx-3 flex flex-col overflow-y-auto overflow-x-hidden">
             {messages.length > 0
               ? messages.map((m) => (
-                  <div
-                    key={m.id}
-                    className={`${
-                      m.role === 'user'
-                        ? 'flex justify-end'
-                        : 'flex justify-start'
+                <div
+                  key={m.id}
+                  className={`${m.role === 'user'
+                    ? 'flex justify-end'
+                    : 'flex justify-start'
                     } my-1`}>
-                    <div
-                      className={`max-w-[60%] px-4 py-2 rounded-lg ${
-                        m.role === 'user'
-                          ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white'
-                          : 'bg-gray-200 opacity-80'
+                  <div
+                    className={`max-w-[60%] px-4 py-2 rounded-lg ${m.role === 'user'
+                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white'
+                      : 'bg-gray-200 opacity-80'
                       }`}>
-                      <ReactMarkdown components={{ a: LinkRenderer }}>
-                        {m.content}
-                      </ReactMarkdown>
-                    </div>
+                    <ReactMarkdown components={{ a: LinkRenderer }}>
+                      {m.content}
+                    </ReactMarkdown>
                   </div>
-                ))
+                </div>
+              ))
               : null}
 
             {isLoading && (

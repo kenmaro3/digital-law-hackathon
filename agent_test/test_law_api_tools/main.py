@@ -7,7 +7,8 @@ from langchain.prompts.chat import MessagesPlaceholder, SystemMessage
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 from langchain.agents import Tool
-from list_law_tool import ListLawTool
+from laws_tool import LawsTool
+#from list_law_tool import ListLawTool
 from detail_law_tool import DetailLawTool
 from similarity_search_tool import SimilaritySearchTool
 
@@ -47,14 +48,26 @@ detail_url = "https://ui.lawapi-prototype-test-elaws.e-gov.go.jp/law?lawId="
 #     質問を理解した場合、SimilaritySearchToolツールを使い、法律の本文から該当箇所を特定し、質問に回答してください。
 
 # """
-PROMPT="""
-     あなたは法律の専門家です。
 
+
+PROMPT="""
+    You are the expert of law and you are so kind that you will try to help giving advise to your customer as a lawyer as much as possible.
+    If your customer ask you a question in japanese, you should reply in japanese. If english, then reponde in english.
+    All of your response should be in markdown format.
+    Your customer is not expert of law, so they might not know what exact keyword to search, so customer might give you some situation or incident instead of keyword.
+    In that case, you use your expertise to guess the keyword you should search to list the related law.
+    You should always use LawsTool to search related laws with the keyword. Keyword should be law name that you guess it is related to the customer description, for instance, 民法 or 商標法.
+    When you use LawsTool, you must input japanese keyword, so you should translate the keyword to japanese, also to write japanese, you sometime typo, so be very careful for keyword to search.
+    When you use the LawsTool, your response needs to include [law_id, law_num] for each law.
+    Plus, law_id should be appended to the end of this link "https://elaws.e-gov.go.jp/document?lawid=".
+    Also, you know many court cases related to the situation of the customer or keyword from customer.
+    so you should provide the court case link with https://www.courts.go.jp/app/hanrei_jp/list1?filter[text1]= with the case keyword in japanese appended after the = in the link, if you have multiple keywords, do like ?filter[text1]=<first keyword>&filter[text2]=<second keyword>.
 """
 
 gpt35 = ChatOpenAI(
     temperature=0,
-    model="gpt-3.5-turbo-0613",
+    #model="gpt-3.5-turbo-0613",
+    model="gpt-4-1106-preview",
     model_kwargs={"top_p":0.1},
     #callbacks=[StreamingStdOutCallbackHandler]
     )
@@ -67,7 +80,7 @@ tools = [
         func=search.run,
         description="useful for when you need to answer questions about current events. You should ask targeted questions"
     ),
-    # ListLawTool(),
+    LawsTool(),
     # DetailLawTool(),
     # SimilaritySearchTool()
 ]
@@ -96,8 +109,11 @@ user_input = """次の法律のタイトルからキーワードを１つだけ�
 被用者年金制度の一元化等を図るための厚生年金保険法等の一部を改正する法律の施行に伴う経過措置に関する省令
 
 """
+user_input = """
+あなたは誰ですか？
+"""
 res = agent.run(user_input)
-# while True:
-#     user_input = input(">> ")
-#     res = agent.run(user_input)
-#     print(f"\n{res}")
+while True:
+    user_input = input(">> ")
+    res = agent.run(user_input)
+    print(f"\n{res}")
