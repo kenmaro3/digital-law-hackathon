@@ -93,7 +93,7 @@ export const ChatArea = () => {
   return (
     <>
       <div className="h-screen max-h-[888px] w-full flex flex-col justify-between items-center">
-        <div className="flex flex-col h-[100%] w-[500px]">
+        <div className="flex flex-col h-[100%] w-[56vh]">
           <div className="flex flex-row justify-between">
             <div
               className="w-[25px] my-2 mx-4"
